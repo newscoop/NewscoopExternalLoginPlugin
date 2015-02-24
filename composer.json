@@ -1,0 +1,23 @@
+{
+    "name": "newscoop/externallogin-plugin-bundle",
+    "description": "ExternalLogin plugin for Newscoop",
+    "keywords": ["Newscoop", "externallogin"],
+    "version": "0.0.1",
+    "type": "newscoop-plugin",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Mark Lewis",
+            "email": "mark.lewis@sourcefabric.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "newscoop/plugins-installer": ">=v0.2"
+    },
+    "autoload": {
+        "psr-0": { "Newscoop\\ExternalLoginPluginBundle\\ExternalLoginPluginBundle": "" }
+    },
+    "target-dir": "Newscoop/ExternalLoginPluginBundle",
+    "minimum-stability": "dev"
+}

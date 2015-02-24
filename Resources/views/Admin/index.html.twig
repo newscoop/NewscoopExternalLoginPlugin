@@ -1,0 +1,23 @@
+
+{% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
+
+{% block admin_title %}{{ parent() }} - ExternalLogin Admin{% endblock %}
+{% block admin_page_title_content %}ExternalLogin Admin{% endblock %}
+
+{% block admin_stylesheets %}
+<link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
+{% endblock %}
+
+{% block admin_scripts %}
+<script src="{{ asset('/js/select2/select2.js') }}"></script>
+<script src="{{ asset('/bundles/newscoopnewscoop/js/jquery.dynatable.js') }}"></script>
+{% endblock %}
+
+{% block admin_content %}
+
+
+<div class="plugin-container">
+  <p>Hi, {{ name }}</p>
+</div>
+
+{% endblock %}
