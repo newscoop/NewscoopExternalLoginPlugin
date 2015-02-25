@@ -12,7 +12,3 @@ services:
           - { name: kernel.event_listener, event: newscoop_newscoop.menu_configure, method: onMenuConfigure }
         arguments:
             - @translator
-
-    newscoop_newscoop.simple_user_provider:
-        class: Newscoop\ExternalLoginPluginBundle\Security\User\SimpleUserProvider
-        arguments: ["@em", %simple_security%]

@@ -8,6 +8,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response; 
 
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Cookie;
+
 /**
  * Route("/external_login")
  */ 
@@ -21,20 +28,22 @@ class ExternalLoginController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->container->get('em');
-        $name = 'external login page';
-        $error = array('message' => 'no errors');
+        $error = null;
         $languages = $em->getRepository('Newscoop\Entity\Language')->getLanguages();
 
-        // TODO: check for token
-        // if token does not exist, redirect to sso login
-        // if token exists, login user with selected language
+        // TODO: if we need to check for a token on GET requests
+        //       add check here for expected parameter(s).  If token 
+        //       does exist, call checkToken in the if
+        $requestHasToken = false;
+        if ($requestHasToken) {
+            return $this->checkToken($request);
+        }
 
         if ($request->isMethod('POST')) {
-            $this->checkToken($request);
+            return $this->checkToken($request);
         }
 
         return array(
-            'name' => $name,
             'error' => $error,
             'defaultLanguage'   => $this->getDefaultLanguage($request, $languages),
             'languages' => $languages
@@ -42,9 +51,57 @@ class ExternalLoginController extends Controller
     }
 
     private function checkToken($request) {
+        $em = $this->container->get('em');
+        $baseurl = $request->getScheme() . '://' . $request->getHttpHost();
         $language = $request->request->get('login_language');
-        //error_log(print_r($request, true));
-        error_log($language);
+
+        // TODO: fill in the actual parameter to look for the token
+        $identity = $request->query->get('openid_identity');
+        // TODO: change this to = $identity once ready
+        $username = 'admin';
+
+        if (empty($identity)) {
+            // TODO: make this var configurable in system preferences
+            $redirectUrl = 'https://login.sourcefabric.org/server/simple/login/';
+            $redirectUrl .= '?return=' . $baseurl . '/external_login';
+            return $this->redirect($redirectUrl);
+        } 
+        
+        $user = $em->getRepository('Newscoop\Entity\User')->findOneByUsername($username);
+
+        $session = $this->container->get('session');
+        $firewall = 'admin_area';
+
+        // first do symfony login
+        $token = new UsernamePasswordToken($user, $user->getPassword(), $firewall, $user->getRoles());
+        $this->get('security.context')->setToken($token); //now the user is logged in
+        $session->set('_security_'.$firewall, serialize($token));
+        
+        // now handle Zend_Auth (blaaaaahhhhhhh...why!)
+        $zendAuth = \Zend_Auth::getInstance();
+        $authAdapter = $this->container->get('auth.adapter');
+        $authAdapter->setUsername($user->getUsername())
+            ->setPassword($user->getPassword())
+            ->setExternal(true)
+            ->setAdmin(true);
+        $result = $zendAuth->authenticate($authAdapter);
+         
+        // and now Oauth
+        $session->set('_security_oauth_authorize', serialize($token));
+
+        $user->setLastLogin(new \DateTime());
+        $em->flush();
+
+        //now dispatch the login event
+        $session->save();
+        $event = new InteractiveLoginEvent($request, $token);
+        $this->get('event_dispatcher')->dispatch('security.interactive_login', $event);
+
+        $response = new RedirectResponse($baseurl . '/admin/');
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $response->headers->setCookie($cookie);
+ 
+        return $response;
     }
 
     private function getDefaultLanguage($request, $languages)

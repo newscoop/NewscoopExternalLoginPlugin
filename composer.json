@@ -2,13 +2,13 @@
     "name": "newscoop/externallogin-plugin-bundle",
     "description": "ExternalLogin plugin for Newscoop",
     "keywords": ["Newscoop", "externallogin"],
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "newscoop-plugin",
     "license": "GPL-3.0",
     "authors": [
         {
-            "name": "Mark Lewis",
-            "email": "mark.lewis@sourcefabric.org"
+            "name": "Your Name",
+            "email": "your.name@domain.com"
         }
     ],
     "require": {
