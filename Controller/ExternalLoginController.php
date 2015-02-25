@@ -28,6 +28,7 @@ class ExternalLoginController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->container->get('em');
+        $preferencesService = $this->container->get('system_preferences_service');
         $error = null;
         $languages = $em->getRepository('Newscoop\Entity\Language')->getLanguages();
 
@@ -52,17 +53,19 @@ class ExternalLoginController extends Controller
 
     private function checkToken($request) {
         $em = $this->container->get('em');
+        $preferencesService = $this->container->get('system_preferences_service');
+        $redirectUrl = $preferencesService->ExternalLoginRedirectUrl;
+        $tokenParameter = $preferencesService->ExternalLoginTokenParameter;
         $baseurl = $request->getScheme() . '://' . $request->getHttpHost();
         $language = $request->request->get('login_language');
 
-        // TODO: fill in the actual parameter to look for the token
-        $identity = $request->query->get('openid_identity');
+        // TODO: if this is not a get param, fill in the actual 
+        //        parameter to look for the token
+        $identity = $request->query->get($tokenParameter);
         // TODO: change this to = $identity once ready
         $username = 'admin';
 
         if (empty($identity)) {
-            // TODO: make this var configurable in system preferences
-            $redirectUrl = 'https://login.sourcefabric.org/server/simple/login/';
             $redirectUrl .= '?return=' . $baseurl . '/external_login';
             return $this->redirect($redirectUrl);
         } 

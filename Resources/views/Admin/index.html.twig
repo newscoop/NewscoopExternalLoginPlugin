@@ -1,8 +1,8 @@
 
 {% extends 'NewscoopNewscoopBundle::admin_layout.html.twig' %}
 
-{% block admin_title %}{{ parent() }} - ExternalLogin Admin{% endblock %}
-{% block admin_page_title_content %}ExternalLogin Admin{% endblock %}
+{% block admin_title %}{{ parent() }} - External Login Admin{% endblock %}
+{% block admin_page_title_content %}External Login Admin{% endblock %}
 
 {% block admin_stylesheets %}
 <link rel="stylesheet" href="{{ asset('/bundles/newscoopnewscoop/css/jquery.dynatable.css') }}">
@@ -17,7 +17,36 @@
 
 
 <div class="plugin-container">
-  <p>Hi, {{ name }}</p>
+  <div class="row"> 
+    <div class="col-sm-12 col-md-6">
+      <form class="form-horizontal" method="post">
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="redirect-url">Redirect Url:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="redirect-url" name="redirect-url" value="{{ redirectUrl }}">
+          <span>'?return={{ callbackUrl }}' will be appended to this url</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="token-parameter">Token Parameter:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="token-parameter" name="token-parameter" value="{{ tokenParameter }}">
+          <span>this parameter should be in the query string of the response from the external auth service</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3"></label>
+        <div class="col-sm-9">
+          <button class="btn btn-success" id="save-settings">Save Settings</button>
+        </div>
+      </div>
+      </form>
+        
+    </div>
+  </div>
 </div>
 
 {% endblock %}
