@@ -1,0 +1,4 @@
+newscoop_external_login_plugin:
+    resource: "@NewscoopExternalLoginPluginBundle/Controller"
+    type:     annotation
+    prefix:   /
