@@ -15,19 +15,10 @@
 
 {% block admin_content %}
 
-
 <div class="plugin-container">
   <div class="row"> 
     <div class="col-sm-12 col-md-6">
       <form class="form-horizontal" method="post">
-
-      <div class="form-group">
-        <label class="control-label col-sm-3" for="redirect-url">Redirect Url:</label>
-        <div class="col-sm-9">
-          <input class="form-control" type="text" id="redirect-url" name="redirect-url" value="{{ redirectUrl }}">
-          <span>'?return={{ callbackUrl }}' will be appended to this url</span>
-        </div>
-      </div>
 
       <div class="form-group">
         <label class="control-label col-sm-3" for="token-parameter">Token Parameter:</label>
@@ -38,13 +29,49 @@
       </div>
 
       <div class="form-group">
+        <label class="control-label col-sm-3" for="redirect-url">Redirect Url:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="redirect-url" name="redirect-url" value="{{ redirectUrl }}">
+          <span>'?return={{ callbackUrl }}' will be appended to this url</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="token-url">Token Check Url:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="token-url" name="token-url" value="{{ tokenUrl }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="ca-path">Path to CA certificates:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="ca-path" name="ca-path" value="{{ caPath }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="cert-file">Certificate File:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="cert-file" name="cert-file" value="{{ certFile }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-sm-3" for="key-file">Key File:</label>
+        <div class="col-sm-9">
+          <input class="form-control" type="text" id="key-file" name="key-file" value="{{ keyFile }}">
+        </div>
+      </div>
+
+      <div class="form-group">
         <label class="control-label col-sm-3"></label>
         <div class="col-sm-9">
           <button class="btn btn-success" id="save-settings">Save Settings</button>
         </div>
       </div>
       </form>
-        
+
     </div>
   </div>
 </div>

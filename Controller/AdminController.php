@@ -27,15 +27,27 @@ class AdminController extends Controller
         $tokenParameter = $preferencesService->ExternalLoginTokenParameter;
 
         if ($request->isMethod('POST')) {
-            $redirectUrl = $request->request->get('redirect-url');
             $tokenParameter = $request->request->get('token-parameter');
-            $preferencesService->set('ExternalLoginRedirectUrl', $redirectUrl);
+            $redirectUrl = $request->request->get('redirect-url');
+            $tokenUrl = $request->request->get('token-url');
+            $caPath = $request->request->get('ca-path');
+            $certFile = $request->request->get('cert-file');
+            $keyFile = $request->request->get('key-file');
             $preferencesService->set('ExternalLoginTokenParameter', $tokenParameter);
+            $preferencesService->set('ExternalLoginRedirectUrl', $redirectUrl);
+            $preferencesService->set('ExternalLoginTokenUrl', $tokenUrl);
+            $preferencesService->set('ExternalLoginCAPath', $caPath);
+            $preferencesService->set('ExternalLoginCertFile', $certFile);
+            $preferencesService->set('ExternalLoginKeyFile', $keyFile);
             $em->flush();
         }
         return array(
-            'redirectUrl' => $redirectUrl,
             'tokenParameter' => $tokenParameter,
+            'redirectUrl' => $redirectUrl,
+            'tokenUrl' => $tokenUrl,
+            'caPath' => $caPath,
+            'certFile' => $certFile,
+            'keyFile' => $keyFile,
             'callbackUrl' => $baseurl . '/external_login'
         ); 
 

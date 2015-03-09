@@ -29,19 +29,17 @@ class ExternalLoginController extends Controller
     {
         $em = $this->container->get('em');
         $preferencesService = $this->container->get('system_preferences_service');
-        $error = null;
+        $tokenParameter = $preferencesService->ExternalLoginTokenParameter;
         $languages = $em->getRepository('Newscoop\Entity\Language')->getLanguages();
+        $error = null;
 
-        // TODO: if we need to check for a token on GET requests
-        //       add check here for expected parameter(s).  If token 
-        //       does exist, call checkToken in the if
-        $requestHasToken = false;
-        if ($requestHasToken) {
-            return $this->checkToken($request);
-        }
-
-        if ($request->isMethod('POST')) {
-            return $this->checkToken($request);
+        if ($request->query->get($tokenParameter) || $request->isMethod('POST')) {
+            $result = $this->checkToken($request);
+            if ($result === false) {
+                $error = array('message' => 'Access is not allowed');
+            } else {
+                return $result;
+            }
         }
 
         return array(
@@ -58,29 +56,46 @@ class ExternalLoginController extends Controller
         $tokenParameter = $preferencesService->ExternalLoginTokenParameter;
         $baseurl = $request->getScheme() . '://' . $request->getHttpHost();
         $language = $request->request->get('login_language');
+        $ssoToken = $request->query->get($tokenParameter);
 
-        // TODO: if this is not a get param, fill in the actual 
-        //        parameter to look for the token
-        $identity = $request->query->get($tokenParameter);
-        // TODO: change this to = $identity once ready
-        $username = 'admin';
-
-        if (empty($identity)) {
+        if (empty($ssoToken)) {
             $redirectUrl .= '?return=' . $baseurl . '/external_login';
             return $this->redirect($redirectUrl);
-        } 
-        
-        $user = $em->getRepository('Newscoop\Entity\User')->findOneByUsername($username);
+        }
+
+        // get username info based on sso token
+        $ch = curl_init();
+        $url = $preferencesService->ExternalLoginTokenUrl . '?' . $tokenParameter . '=' . $ssoToken .
+            '&remote_addr=' . $_SERVER['REMOTE_ADDR'];
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
+        curl_setopt($ch, CURLOPT_CAPATH, $preferencesService->ExternalLoginCAPath);
+        curl_setopt($ch, CURLOPT_SSLCERT, $preferencesService->ExternalLoginCertFile);
+        curl_setopt($ch, CURLOPT_SSLKEY, $preferencesService->ExternalLoginKeyFile);
+        $result = @curl_exec($ch);
+        curl_close($ch);
+        $sso = @unserialize($result);
+        $username = empty($sso['login']) ? null : $sso['login'];
+
+        if (!$username || !($user = $em->getRepository('Newscoop\Entity\User')->findOneByUsername($username))) {
+            return false;
+        }
 
         $session = $this->container->get('session');
         $firewall = 'admin_area';
 
         // first do symfony login
         $token = new UsernamePasswordToken($user, $user->getPassword(), $firewall, $user->getRoles());
+        if (empty($token)) {
+            return false;
+        }
         $this->get('security.context')->setToken($token); //now the user is logged in
         $session->set('_security_'.$firewall, serialize($token));
-        
-        // now handle Zend_Auth (blaaaaahhhhhhh...why!)
+
         $zendAuth = \Zend_Auth::getInstance();
         $authAdapter = $this->container->get('auth.adapter');
         $authAdapter->setUsername($user->getUsername())
@@ -88,7 +103,7 @@ class ExternalLoginController extends Controller
             ->setExternal(true)
             ->setAdmin(true);
         $result = $zendAuth->authenticate($authAdapter);
-         
+
         // and now Oauth
         $session->set('_security_oauth_authorize', serialize($token));
 
