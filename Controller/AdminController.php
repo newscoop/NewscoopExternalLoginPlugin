@@ -21,10 +21,12 @@ class AdminController extends Controller
         $em = $this->container->get('em');
         $baseurl = $request->getScheme() . '://' . $request->getHttpHost();
         $preferencesService = $this->container->get('system_preferences_service');
-        //'https://login.sourcefabric.org/server/simple/login/';
-        $redirectUrl = $preferencesService->ExternalLoginRedirectUrl; 
-        //'openid_identity';
         $tokenParameter = $preferencesService->ExternalLoginTokenParameter;
+        $redirectUrl = $preferencesService->ExternalLoginRedirectUrl;
+        $tokenUrl = $preferencesService->ExternalLoginTokenUrl;
+        $caPath = $preferencesService->ExternalLoginCAPath;
+        $certFile = $preferencesService->ExternalLoginCertFile;
+        $keyFile = $preferencesService->ExternalLoginKeyFile;
 
         if ($request->isMethod('POST')) {
             $tokenParameter = $request->request->get('token-parameter');
