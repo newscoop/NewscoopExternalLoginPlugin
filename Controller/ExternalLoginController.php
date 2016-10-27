@@ -72,7 +72,7 @@ class ExternalLoginController extends Controller
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_CAPATH, $preferencesService->ExternalLoginCAPath);
         curl_setopt($ch, CURLOPT_SSLCERT, $preferencesService->ExternalLoginCertFile);
         curl_setopt($ch, CURLOPT_SSLKEY, $preferencesService->ExternalLoginKeyFile);
